@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ScrollView, Text, StyleSheet, Image, FlatList, TouchableOpacity, Platform } from 'react-native';
-import {MapScreen} from './Mapa.js'
+// import {MapScreen} from './Mapa.js'
 
 
 export default function Home({ navigation }) {
@@ -92,7 +92,7 @@ export default function Home({ navigation }) {
       </View>
     </View>
   );
-
+  
   const renderCareItem = ({ item }) => (
     <TouchableOpacity style={styles.careItem}>
       <Image source={{ uri: item.img }} style={styles.careImage} />
@@ -106,10 +106,10 @@ export default function Home({ navigation }) {
       </View>
     </TouchableOpacity>
   );
-
+  
   const renderServiceItem = ({ item }) => (
     <TouchableOpacity 
-      style={styles.serviceItem}
+    style={styles.serviceItem}
       onPress={() => navigation.navigate('ServiceDetail', { 
         serviceId: item.id, 
         serviceName: item.name 
@@ -211,7 +211,17 @@ export default function Home({ navigation }) {
         <Text style={styles.contactText}>Tel: 55 1234 5678</Text>
       </View>
       ) : (
-        <MapScreen />
+      <View style={styles.mapContainer}>
+        <Image 
+          source={require("../assets/Mapa.png")}
+          style={styles.mapImage}
+        />
+        <View style={styles.mapOverlay}>
+          <Text style={styles.mapTitle}>ReactPets Veterinaria</Text>
+          <Text style={styles.mapAddress}>Av. Principal 123, Ciudad de México</Text>
+          <Text style={styles.mapHours}>Horario: Lunes a Viernes 9am - 7pm</Text>
+        </View>
+      </View>
       )}
       {/* Footer */}
       <View style={styles.footer}>
@@ -468,5 +478,43 @@ const styles = StyleSheet.create({
     height: 80,
     marginBottom: 15,
     tintColor: 'rgb(215, 173, 235)',
-  }
+  },
+  mapContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    margin: 20,
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  mapImage: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+  },
+  mapOverlay: {
+    padding: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  mapTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#944bb6',
+    marginBottom: 5,
+  },
+  mapAddress: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 3,
+  },
+  mapHours: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+  },
 });

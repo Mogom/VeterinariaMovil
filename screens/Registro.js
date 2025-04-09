@@ -45,36 +45,26 @@ export default function RegisterForm({ navigation }) {
             return;
         }
     
-        // Preparar los datos para enviar
-        const datosRegistro = new FormData();
-        datosRegistro.append('nombre', formData.name);
-        datosRegistro.append('email', formData.email);
-        datosRegistro.append('password', formData.password);
-        datosRegistro.append('telefono', formData.phone);
-        datosRegistro.append('tipo_mascota', formData.petType);
-        datosRegistro.append('nombre_mascota', formData.petName);
-    
         try {
-            const response = await fetch('https://192.168.64.197/veterinaria/insertPropietario.php', {
+            const response = await fetch('http://172.30.4.150/veterinaria/insertPropietario.php', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    nombre: formData.name,
-                    email: formData.email,
-                    password: formData.password,
-                    telefono: formData.phone,
-                    tipo_mascota: formData.petType,
-                    nombre_mascota: formData.petName
-                }),
+                body: `name=${encodeURIComponent(formData.name)}
+                &email=${encodeURIComponent(formData.email)}
+                &password=${encodeURIComponent(formData.password)}
+                &phone=${encodeURIComponent(formData.phone)}
+                &petName=${encodeURIComponent(formData.petName)}
+                &petType=${encodeURIComponent(formData.petType)}`
             });
     
             const result = await response.json();
+            console.log('Respuesta del servidor:', result);
     
             if (response.ok) {
-                if (result.success) {
+                if (result.message === 'Registro exitoso') {
                     Alert.alert(
                         'Registro Exitoso',
                         `Bienvenido ${formData.name}! Tu cuenta ha sido creada.`,
