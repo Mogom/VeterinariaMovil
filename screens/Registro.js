@@ -29,7 +29,7 @@ export default function RegisterForm({ navigation }) {
 
 
     const handleRegister = async () => {
-        // Validaciones
+        // Validaciones (se mantienen igual)
         if (!formData.email || !formData.name || !formData.password || !formData.phone) {
             Alert.alert('Error', 'Por favor complete todos los campos obligatorios');
             return;
@@ -49,32 +49,34 @@ export default function RegisterForm({ navigation }) {
             const response = await fetch('http://172.30.4.150/veterinaria/insertPropietario.php', {
                 method: 'POST',
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `name=${encodeURIComponent(formData.name)}
-                &email=${encodeURIComponent(formData.email)}
-                &password=${encodeURIComponent(formData.password)}
-                &phone=${encodeURIComponent(formData.phone)}
-                &petName=${encodeURIComponent(formData.petName)}
-                &petType=${encodeURIComponent(formData.petType)}`
+                body: `name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}&password=${encodeURIComponent(formData.password)}&phone=${encodeURIComponent(formData.phone)}&petName=${encodeURIComponent(formData.petName)}&petType=${encodeURIComponent(formData.petType)}`
             });
     
-            const result = await response.json();
-            console.log('Respuesta del servidor:', result);
+            const resultText = await response.text(); // Primero obtenemos el texto
+            console.log('Respuesta del servidor:', resultText);
+    
+            // Verificamos si es JSON válido
+            let result;
+            try {
+                result = JSON.parse(resultText);
+            } catch {
+                result = { message: resultText };
+            }
     
             if (response.ok) {
-                if (result.message === 'Registro exitoso') {
+                if (result.message === 'Registro exitoso' || resultText === 'Registro exitoso') {
                     Alert.alert(
                         'Registro Exitoso',
                         `Bienvenido ${formData.name}! Tu cuenta ha sido creada.`,
                         [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
                     );
                 } else {
-                    Alert.alert('Error', result.message || 'Error en el registro');
+                    Alert.alert('Error', result.message || resultText || 'Error en el registro');
                 }
             } else {
-                Alert.alert('Error', result.message || 'Error en la conexión con el servidor');
+                Alert.alert('Error', result.message || resultText || 'Error en la conexión con el servidor');
             }
         } catch (error) {
             console.error('Error en el registro:', error);
