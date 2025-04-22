@@ -1,21 +1,18 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-export default function FormCita({ navigation }) {
+export default function FormCita({ navigation, route }) {
+  const { propietario_id } = route.params; // Recibir el ID del propietario autenticado
+  const [mascotas, setMascotas] = useState([]);
   const [formData, setFormData] = useState({
-    petName: '',
-    petType: 'Perro',
+    petId: '',
     service: 'Consulta General',
-    ownerName: '',
-    phone: '',
-    email: '',
     date: '',
     time: '',
     notes: ''
   });
 
-  const petTypes = ['Perro', 'Gato', 'Conejo', 'Ave', 'Reptil', 'Otro'];
   const services = [
     'Consulta General',
     'Vacunación',
@@ -29,13 +26,60 @@ export default function FormCita({ navigation }) {
     '02:00 PM', '03:00 PM', '04:00 PM'
   ];
 
-  const handleSubmit = () => {
-    if (!formData.date || !formData.time) {
-      alert('Por favor selecciona fecha y hora');
+  useEffect(() => {
+    // Obtener las mascotas del usuario
+    const fetchMascotas = async () => {
+      try {
+        const response = await fetch(`http://192.168.0.15/BackCode/getMascotas.php?propietario_id=${propietario_id}`);
+        const result = await response.json();
+        if (result.success) {
+          setMascotas(result.mascotas);
+        } else {
+          Alert.alert('Error', 'No se pudieron cargar las mascotas.');
+        }
+      } catch (error) {
+        console.error('Error al obtener las mascotas:', error);
+        Alert.alert('Error', 'No se pudo conectar con el servidor.');
+      }
+    };
+
+    fetchMascotas();
+  }, [propietario_id]);
+
+  const handleSubmit = async () => {
+    if (!formData.petId || !formData.date || !formData.time) {
+      alert('Por favor completa todos los campos obligatorios');
       return;
     }
-    alert(`Cita reservada para ${formData.petName} el ${formData.date} a las ${formData.time}`);
-    navigation.goBack();
+
+    try {
+      const response = await fetch('http://192.168.0.15/BackCode/registCita.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          propietario_id,
+          pet_id: formData.petId,
+          service: formData.service,
+          date: formData.date,
+          time: formData.time,
+          notes: formData.notes,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('Cita registrada exitosamente');
+        navigation.goBack();
+      } else {
+        alert(result.message || 'Error al registrar la cita');
+      }
+    } catch (error) {
+      console.error('Error al registrar la cita:', error);
+      alert('No se pudo conectar con el servidor. Intenta nuevamente.');
+    }
   };
 
   const handleChange = (name, value) => {
@@ -57,69 +101,33 @@ export default function FormCita({ navigation }) {
       </View>
 
       <View style={styles.formContainer}>
-        {/* Información de la Mascota */}
-        <Text style={styles.sectionHeader}>Información de la Mascota</Text>
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Nombre de la mascota"
-          value={formData.petName}
-          onChangeText={(text) => handleChange('petName', text)}
-        />
+        {/* Selección de Mascota */}
+        <Text style={styles.sectionHeader}>Selecciona tu Mascota</Text>
+        <Picker
+          selectedValue={formData.petId}
+          style={styles.picker}
+          onValueChange={(itemValue) => handleChange('petId', itemValue)}
+        >
+          <Picker.Item label="Selecciona una mascota" value="" />
+          {mascotas.map((mascota) => (
+            <Picker.Item key={mascota.id} label={mascota.pet_name} value={mascota.id} />
+          ))}
+        </Picker>
 
-        <View style={styles.pickerContainer}>
-          <Text style={styles.pickerLabel}>Tipo de mascota:</Text>
-          <Picker
-            selectedValue={formData.petType}
-            style={styles.picker}
-            onValueChange={(itemValue) => handleChange('petType', itemValue)}>
-            {petTypes.map((type, index) => (
-              <Picker.Item key={index} label={type} value={type} />
-            ))}
-          </Picker>
-        </View>
+        {/* Selección de Servicio */}
+        <Text style={styles.sectionHeader}>Servicio</Text>
+        <Picker
+          selectedValue={formData.service}
+          style={styles.picker}
+          onValueChange={(itemValue) => handleChange('service', itemValue)}
+        >
+          {services.map((service, index) => (
+            <Picker.Item key={index} label={service} value={service} />
+          ))}
+        </Picker>
 
-        <View style={styles.pickerContainer}>
-          <Text style={styles.pickerLabel}>Servicio requerido:</Text>
-          <Picker
-            selectedValue={formData.service}
-            style={styles.picker}
-            onValueChange={(itemValue) => handleChange('service', itemValue)}>
-            {services.map((service, index) => (
-              <Picker.Item key={index} label={service} value={service} />
-            ))}
-          </Picker>
-        </View>
-
-        {/* Información del Dueño */}
-        <Text style={styles.sectionHeader}>Información del Dueño</Text>
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Tu nombre completo"
-          value={formData.ownerName}
-          onChangeText={(text) => handleChange('ownerName', text)}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Teléfono de contacto"
-          keyboardType="phone-pad"
-          value={formData.phone}
-          onChangeText={(text) => handleChange('phone', text)}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Correo electrónico"
-          keyboardType="email-address"
-          value={formData.email}
-          onChangeText={(text) => handleChange('email', text)}
-        />
-
-        {/* Fecha y Hora - Versión simplificada */}
+        {/* Fecha y Hora */}
         <Text style={styles.sectionHeader}>Fecha y Hora</Text>
-        
         <TextInput
           style={styles.input}
           placeholder="DD/MM/AAAA"
@@ -127,24 +135,21 @@ export default function FormCita({ navigation }) {
           onChangeText={(text) => handleChange('date', text)}
           keyboardType="numeric"
         />
-
-        <View style={styles.pickerContainer}>
-          <Text style={styles.pickerLabel}>Hora disponible:</Text>
-          <Picker
-            selectedValue={formData.time}
-            style={styles.picker}
-            onValueChange={(itemValue) => handleChange('time', itemValue)}>
-            <Picker.Item label="Selecciona una hora" value="" />
-            {availableTimes.map((time, index) => (
-              <Picker.Item key={index} label={time} value={time} />
-            ))}
-          </Picker>
-        </View>
+        <Picker
+          selectedValue={formData.time}
+          style={styles.picker}
+          onValueChange={(itemValue) => handleChange('time', itemValue)}
+        >
+          <Picker.Item label="Selecciona una hora" value="" />
+          {availableTimes.map((time, index) => (
+            <Picker.Item key={index} label={time} value={time} />
+          ))}
+        </Picker>
 
         {/* Notas adicionales */}
         <TextInput
           style={[styles.input, styles.multilineInput]}
-          placeholder="Notas adicionales (síntomas, comportamientos, etc.)"
+          placeholder="Notas adicionales (opcional)"
           multiline
           numberOfLines={4}
           value={formData.notes}

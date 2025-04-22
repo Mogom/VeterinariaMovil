@@ -5,11 +5,32 @@ export default function Login({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    if (username === '111' && password === '111') {
-      navigation.navigate('Home');
-    } else {
-      Alert.alert('Error', 'Usuario o contraseña incorrectos');
+  const handleLogin = async () => {
+    if (!username || !password) {
+      Alert.alert('Error', 'Por favor ingresa tu correo y contraseña');
+      return;
+    }
+  
+    try {
+      const response = await fetch('http://192.168.0.15/BackCode/login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: username, password }),
+      });
+  
+      const result = await response.json();
+  
+      if (result.success) {
+        Alert.alert('Bienvenido', `Hola ${result.user.name}, has iniciado sesión correctamente`);
+        navigation.navigate('Home', { userId: result.user.id });
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+      Alert.alert('Error', 'No se pudo conectar con el servidor. Intenta nuevamente.');
     }
   };
 

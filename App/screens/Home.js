@@ -3,7 +3,9 @@ import { View, ScrollView, Text, StyleSheet, Image, FlatList, TouchableOpacity, 
 // import {MapScreen} from './Mapa.js'
 
 
-export default function Home({ navigation }) {
+export default function Home({ navigation, route }) {
+  const { userId } = route.params; // Recibir el userId desde la pantalla anterior
+
   const services = [
     { id: '1', name: 'Consulta Veterinaria', img: "https://peru21.pe/sites/default/efsfiles/2024-02/VZQWYWNAVFBGBOD7322PRODCPU.jpg" },
     { id: '2', name: 'Vacunación', img: "https://www.clinicaraza.com/web/image/32994/Veterinario%20a%20domicilio%20-%20Clinica%20Raza.jpg" },
@@ -144,7 +146,7 @@ export default function Home({ navigation }) {
           <Text style={styles.heroSubtitle}>Cuidamos a tu mascota como se merece</Text>
           <TouchableOpacity 
             style={styles.ctaButton}
-            onPress={() => navigation.navigate('FormCita')}
+            onPress={() => navigation.navigate('FormCita', { propietario_id: userId })}
           >
             <Text style={styles.ctaButtonText}>Reservar cita</Text>
           </TouchableOpacity>
