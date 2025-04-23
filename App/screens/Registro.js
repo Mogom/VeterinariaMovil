@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Alert, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-export default function RegisterForm({ navigation }) {
+export default function RegisterForm({ navigation, route}) {
+    const { userId } = route.params || {};  // Default to empty object if `params` is undefined
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -42,7 +44,7 @@ export default function RegisterForm({ navigation }) {
         setLoading(true); // Mostrar pantalla de carga
 
         try {
-            const response = await fetch('http://192.168.0.15/BackCode/insertPropietario.php', {
+            const response = await fetch('http://192.168.0.100/BackCode/insertPropietario.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -61,11 +63,21 @@ export default function RegisterForm({ navigation }) {
             }
 
             if (response.ok && (result.message === 'Registro exitoso' || resultText === 'Registro exitoso')) {
-                Alert.alert(
-                    'Registro Exitoso',
-                    `Bienvenido ${formData.name}! Tu cuenta ha sido creada.`,
-                    [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
-                );
+                if (!userId) {
+                    Alert.alert(
+                        'Registro Exitoso',
+                        `Bienvenido ${formData.name}! Tu cuenta ha sido creada.`,
+                        [{ text: 'OK', onPress: () => navigation.navigate('Login')}]
+                    );    
+                    return null;
+                }
+                else if(userId){
+                    Alert.alert(
+                        'Registro Exitoso',
+                        `Bienvenido ${formData.name}! Tu cuenta ha sido creada.`,
+                        [{ text: 'OK', onPress: () => navigation.navigate('Home')}]
+                    );    
+                }
             } else {
                 Alert.alert('Error', result.message || resultText || 'Error en el registro');
             }

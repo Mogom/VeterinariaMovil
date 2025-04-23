@@ -12,7 +12,7 @@ $phone = $_POST['phone'] ?? '';
 $petName = $_POST['petName'] ?? '';
 $petType = $_POST['petType'] ?? '';
 
-$response = ['success' => false, 'message' => ''];
+$response = ['success' => false, 'message' => '', 'userId' => ''];
 
 // Validaciones
 if (empty($name) || empty($email) || empty($_POST['password']) || empty($phone)) {
@@ -40,6 +40,7 @@ try {
             $conn->commit();
             $response['success'] = true;
             $response['message'] = 'Registro exitoso';
+            $response['userId'] = $propietario_id;
         } else {
             $conn->rollback();
             $response['message'] = 'Error al registrar la mascota';

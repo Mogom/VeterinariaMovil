@@ -10,7 +10,7 @@ export default function Profile({ navigation, route }) {
     // Obtener información del usuario y sus mascotas
     const fetchProfileData = async () => {
       try {
-        const response = await fetch(`http://192.168.0.15/BackCode/getProfile.php?userId=${userId}`);
+        const response = await fetch(`http://192.168.0.100/BackCode/getProfile.php?userId=${userId}`);
         const result = await response.json();
         if (result.success) {
           setUserInfo(result.user);

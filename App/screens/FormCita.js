@@ -30,7 +30,7 @@ export default function FormCita({ navigation, route }) {
     // Obtener las mascotas del usuario
     const fetchMascotas = async () => {
       try {
-        const response = await fetch(`http://192.168.0.15/BackCode/getMascotas.php?propietario_id=${propietario_id}`);
+        const response = await fetch(`http://192.168.0.100/BackCode/getMascotas.php?propietario_id=${propietario_id}`);
         const result = await response.json();
         if (result.success) {
           setMascotas(result.mascotas);

@@ -12,7 +12,7 @@ export default function Login({ navigation }) {
     }
   
     try {
-      const response = await fetch('http://192.168.0.15/BackCode/login.php', {
+      const response = await fetch('http://192.168.0.100/BackCode/login.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

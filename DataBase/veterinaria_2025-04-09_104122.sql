@@ -1,3 +1,4 @@
+-- Active: 1743091557662@@127.0.0.1@3306@veterinaria
 DROP TABLE IF EXISTS veterinaria.mascotas;
 
 CREATE TABLE veterinaria.mascotas (
